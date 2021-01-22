@@ -5,11 +5,6 @@ import emoji
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 
-nltk.download('stopwords')
-nltk.download('punkt')
-nltk.download('wordnet')
-
-
 def get_emotion(input):
     df = {'Word': ['night', 'tolerate', 'broke', 'shut', 'abhorrence', 'abhorrent', 'abominably', 'abominate', 'admirable', 'admirably', 'adore', 'adorably',
                    'adoration', 'adoring', 'affection', 'affectional', 'affectionate', 'affectionateness', 'aggrav',
