@@ -3,7 +3,7 @@ AllChat is a python application that is accessible to everyone regardless of the
 
 Dependencies
 ```
-python 3.7
+python3
 nltk
 emoji
 kivy
