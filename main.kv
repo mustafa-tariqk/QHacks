@@ -3,6 +3,31 @@
         id: label
         text:
         halign: "center"
+<SignIn>
+    BoxLayout:
+        orientation: 'vertical'
+        MDTextField:
+            id: host_field
+            mode: 'rectangle'
+            hint_text: "Enter Host"
+            text:
+
+        MDTextField:
+            id: port_field
+            mode: 'rectangle'
+            hint_text: "Enter Port"
+            text:
+
+        MDTextField:
+            id: name_field
+            mode: 'rectangle'
+            hint_text: "Enter Name"
+            text:
+            on_text_validate:
+                root.sign_in()
+                root.manager.transition.direction = 'left'
+                root.manager.current = 'app'
+
 
 <AppLayout>
     BoxLayout:

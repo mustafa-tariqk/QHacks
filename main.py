@@ -1,5 +1,6 @@
 from kivy.lang import Builder
 from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.screenmanager import ScreenManager, Screen
 from kivymd.app import MDApp
 from kivymd.uix.tab import MDTabsBase
 from kivymd.uix.list import TwoLineAvatarIconListItem
@@ -9,6 +10,13 @@ from kivy.uix.boxlayout import BoxLayout
 
 from socket import AF_INET, socket, SOCK_STREAM
 from threading import Thread
+
+# Global variables
+HOST = ''
+PORT = 33000
+NAME = ''
+client_socket = socket(AF_INET, SOCK_STREAM)
+BUFSIZ = 1024
 
 
 class TwoLineAvatarIconListItemAligned(TwoLineAvatarIconListItem):
@@ -27,29 +35,12 @@ class Tab(FloatLayout, MDTabsBase):
     pass
 
 
-class AppLayout(BoxLayout):
+class AppLayout(Screen):
     global NAME
-
-    def send_message(self, image_name):
-        """
-        Has to be done here to let kivy access the function
-        """
-        message = self.ids.msg_field.text + "          "
-        # Sends the message from the app
-        client_socket.send(bytes(self.ids.msg_field.text, "utf8"))
-
-        # Reset text field
-        self.ids.msg_field.text = ''
-        new_message = TwoLineAvatarIconListItemAligned(text=message, secondary_text=NAME+"          ", halign='right')
-        new_message.add_widget(ImageRightWidget(source=image_name))
-
-        self.ids.msg_list.add_widget(new_message)
-
-
-class MainApp(MDApp):
-    global NAME
+    global BUFSIZ, client_socket, HOST, PORT, NAME
 
     def receive(self):
+
         """Handles receiving of messages."""
         while True:
             msg = ''
@@ -68,23 +59,72 @@ class MainApp(MDApp):
                 print("broken")
                 break
 
-    def build(self):
-        return AppLayout()
+    def on_pre_enter(self, *args):
+        global BUFSIZ, client_socket, HOST, PORT, NAME
 
-    def on_start(self):
         # Ping username to server
         client_socket.send(bytes(NAME, "utf8"))
-        # Set Colors
-        self.theme_cls.primary_palette = 'Cyan'
 
         # Start receiving messages
         receive_thread = Thread(target=self.receive)
         receive_thread.start()
 
+    def send_message(self, image_name):
+        """
+        Has to be done here to let kivy access the function
+        """
+        message = self.ids.msg_field.text + "          "
+        # Sends the message from the app
+        client_socket.send(bytes(self.ids.msg_field.text, "utf8"))
+
+        # Reset text field
+        self.ids.msg_field.text = ''
+        new_message = TwoLineAvatarIconListItemAligned(text=message, secondary_text=NAME + "          ", halign='right')
+        new_message.add_widget(ImageRightWidget(source=image_name))
+
+        self.ids.msg_list.add_widget(new_message)
+
     def new_message(self, message, image_name, name='Server'):
+        """
+        Compose a message to showcase in the app
+        """
         new_message = TwoLineAvatarIconListItemAligned(text=message, secondary_text=name, halign='left')
         new_message.add_widget(ImageLeftWidget(source=image_name))
-        self.root.ids.msg_list.add_widget(new_message)
+        self.ids.msg_list.add_widget(new_message)
+
+
+class SignIn(Screen):
+    def sign_in(self):
+        global HOST, PORT, NAME
+        HOST = self.ids.host_field.text
+        PORT = self.ids.port_field.text
+        NAME = self.ids.name_field.text
+
+        # ----Now comes the sockets part----
+        if not HOST:
+            HOST = 'localhost'
+        else:
+            HOST = int(PORT)
+
+        if not PORT:
+            PORT = 33000
+        else:
+            PORT = int(PORT)
+
+        ADDR = (HOST, PORT)
+
+        client_socket.connect(ADDR)
+
+
+class MainApp(MDApp):
+    global NAME
+
+    def build(self):
+        sm = ScreenManager()
+        sm.add_widget(SignIn(name='signin'))
+        sm.add_widget(AppLayout(name='app'))
+
+        return sm
 
     def on_tab_switch(
             self, instance_tabs, instance_tab, instance_tab_label, tab_text
@@ -99,20 +139,5 @@ class MainApp(MDApp):
 
         pass
 
-
-# ----Now comes the sockets part----
-HOST = input('Enter host: ')
-PORT = input('Enter port: ')
-NAME = input('Enter Name: ')
-if not PORT:
-    PORT = 33000
-else:
-    PORT = int(PORT)
-
-BUFSIZ = 1024
-ADDR = (HOST, PORT)
-
-client_socket = socket(AF_INET, SOCK_STREAM)
-client_socket.connect(ADDR)
 
 MainApp().run()  # Starts GUI execution.
