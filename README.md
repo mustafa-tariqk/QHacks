@@ -7,6 +7,7 @@ python3
 nltk
 emoji
 kivy
+tensorflow
 ```
 Add this to text_analysis.py before you run for the first time. Then remove it.
 
