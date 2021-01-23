@@ -1,32 +1,62 @@
-import socket
-import text_analysis
-# Gets the IP
-HOST = socket.gethostname()
-PORT = 55555
-# Creates a socket object
-server=socket.socket()
-# Binds the host and port number tupple to socket
-server.bind((HOST, PORT))
-# Server waits for a connection (1 person)
-server.listen(1)
-# Accepts a connection with a host and port number
-conn,addr=server.accept()
-print(addr, "Server has now connected")
-print("")
-while True:
-    # Waits for a message to be inputed
-    message=input(str(": "))
-    # Encodes message to UTF-8 to send
-    message=message.encode("utf-8")
-    # Sends message over connection
-    conn.send(message)
-    print("")
-    # Receives a message up to 1024 bytes and assigns to a variable
-    incoming_message=conn.recv(1024)
-    # Decodes the incoming message from bytes to text
-    incoming_message=incoming_message.decode("utf-8")
-    # Prints the incoming message
-    print("Person 1: ",incoming_message)
-    # Runs the code through the text analysis AI to print mood
-    print(text_analysis.get_emotion(incoming_message))
-    print("")
+"""Server for multithreaded (asynchronous) chat application."""
+from socket import AF_INET, socket, SOCK_STREAM
+from threading import Thread
+
+
+def accept_incoming_connections():
+    """Sets up handling for incoming clients."""
+    while True:
+        client, client_address = SERVER.accept()
+        print("%s:%s has connected." % client_address)
+        client.send(bytes("Greetings from the cave! Now type your name and press enter!", "utf8"))
+        addresses[client] = client_address
+        Thread(target=handle_client, args=(client,)).start()
+
+
+def handle_client(client):  # Takes client socket as argument.
+    """Handles a single client connection."""
+
+    name = client.recv(BUFSIZ).decode("utf8")
+    welcome = 'Welcome %s! If you ever want to quit, type {quit} to exit.' % name
+    client.send(bytes(welcome, "utf8"))
+    msg = "%s has joined the chat!" % name
+    broadcast(bytes(msg, "utf8"))
+    clients[client] = name
+
+    while True:
+        msg = client.recv(BUFSIZ)
+        if msg != bytes("{quit}", "utf8"):
+            broadcast(msg, name + ": ")
+        else:
+            client.send(bytes("{quit}", "utf8"))
+            client.close()
+            del clients[client]
+            broadcast(bytes("%s has left the chat." % name, "utf8"))
+            break
+
+
+def broadcast(msg, prefix=""):  # prefix is for name identification.
+    """Broadcasts a message to all the clients."""
+
+    for sock in clients:
+        sock.send(bytes(prefix, "utf8") + msg)
+
+
+clients = {}
+addresses = {}
+
+HOST = ''
+PORT = 33000
+BUFSIZ = 1024
+ADDR = (HOST, PORT)
+
+SERVER = socket(AF_INET, SOCK_STREAM)
+SERVER.bind(ADDR)
+
+if __name__ == "__main__":
+    SERVER.listen(5)
+    print("Waiting for connection...")
+    ACCEPT_THREAD = Thread(target=accept_incoming_connections)
+    ACCEPT_THREAD.start()
+    ACCEPT_THREAD.join()
+    SERVER.close()
