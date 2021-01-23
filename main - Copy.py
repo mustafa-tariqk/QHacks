@@ -7,6 +7,7 @@ from kivymd.uix.list import TwoLineAvatarIconListItem
 from kivymd.uix.list import ImageLeftWidget
 from kivymd.uix.list import ImageRightWidget
 from kivy.uix.boxlayout import BoxLayout
+import json
 
 from socket import AF_INET, socket, SOCK_STREAM
 from threading import Thread
@@ -93,12 +94,11 @@ class AppLayout(Screen):
         self.ids.msg_list.add_widget(new_message)
 
 
-class SignIn(Screen):
+class SignInServer(Screen):
     def sign_in(self):
-        global HOST, PORT, NAME
+        global HOST, PORT
         HOST = self.ids.host_field.text
         PORT = self.ids.port_field.text
-        NAME = self.ids.name_field.text
 
         # ----Now comes the sockets part----
         if not HOST:
@@ -116,12 +116,33 @@ class SignIn(Screen):
         client_socket.connect(ADDR)
 
 
+class SignIn(Screen):
+    def validate_login(self):
+        global NAME
+        with open("sign_in_details.json", 'r') as f:
+            sign_in_dict = json.load(f)
+
+        if self.ids.username_field.text not in sign_in_dict.keys():
+            self.ids.username_field.hint_text = "This is not a valid username"
+            #self.ids.username_field.line_color_normal = "Red"
+
+        else:
+            if self.ids.password_field.text == sign_in_dict[self.ids.username_field.text]["password"]:
+                self.manager.current = "signin"
+                NAME = sign_in_dict[self.ids.username_field.text]["name"]
+
+            else:
+                self.ids.password_field.hint_text = "This is not a valid password"
+                #self.ids.password_field.line_color_normal = "Red"
+
+
 class MainApp(MDApp):
     global NAME
 
     def build(self):
         sm = ScreenManager()
-        sm.add_widget(SignIn(name='signin'))
+        sm.add_widget(SignIn(name='password'))
+        sm.add_widget(SignInServer(name='signin'))
         sm.add_widget(AppLayout(name='app'))
 
         return sm
@@ -138,6 +159,5 @@ class MainApp(MDApp):
         """
 
         pass
-
 
 MainApp().run()  # Starts GUI execution.
