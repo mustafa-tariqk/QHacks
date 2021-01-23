@@ -1,0 +1,28 @@
+<Tab>:
+    MDLabel:
+        id: label
+        text:
+        halign: "center"
+
+<AppLayout>
+    BoxLayout:
+        orientation: 'vertical'
+        MDToolbar:
+            title: "AllChat"
+            right_action_items: [ ['magnify', lambda x: print("magnify")], ['chat', lambda x: print("chat")], ['dots-vertical', lambda x: print('settings')] ]
+
+        ScrollView:
+            MDList:
+                id: msg_list
+
+        MDTextField:
+            id: msg_field
+            mode: 'rectangle'
+            hint_text: "Chat box"
+            helper_text: "Say something...or else"
+            helper_text_mode: "on_focus"
+            text:
+            on_text_validate: root.send_message('profile_pic\Robbie.png')
+
+
+
