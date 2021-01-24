@@ -1,10 +1,10 @@
 {
-    "khoanguyen": {
+    "123": {
         "name": "Obi-wan Kenobi",
-        "password": "padmeisfuckinhot"
+        "password": "123"
     },
-    "someonerandom": {
+    "456": {
         "name": "General Grievous",
-        "password": "afineadditiontomycollection"
+        "password": "456"
     }
 }
