@@ -55,7 +55,7 @@ class AppLayout(Screen):
                     try:
                         incoming_msg = msg.split(':')
                         if incoming_msg[0] != NAME:
-                            self.new_message(incoming_msg[1], "profile_pic\Moose.png", name=incoming_msg[0])
+                            self.new_message(incoming_msg[1]+emotion_display.main(incoming_msg[1]), "profile_pic\Moose.png", name=incoming_msg[0])
                     except:
                         self.new_message(msg, "profile_pic\Ammar.png")
 
@@ -77,9 +77,9 @@ class AppLayout(Screen):
         """
         Has to be done here to let kivy access the function
         """
-        message = self.ids.msg_field.text
-        message += emotion_display.main(message)
-        message += "          "
+        message = self.ids.msg_field.text+"          "
+
+
 
         # Sends the message from the app
         client_socket.send(bytes(self.ids.msg_field.text, "utf8"))
@@ -130,7 +130,7 @@ class SignIn(Screen):
 
         if self.ids.username_field.text not in sign_in_dict.keys():
             self.ids.username_field.hint_text = "This is not a valid username"
-            # self.ids.username_field.line_color_normal = "Red"
+            #self.ids.username_field.line_color_normal = "Red"
 
         else:
             if self.ids.password_field.text == sign_in_dict[self.ids.username_field.text]["password"]:
@@ -139,7 +139,7 @@ class SignIn(Screen):
 
             else:
                 self.ids.password_field.hint_text = "This is not a valid password"
-                # self.ids.password_field.line_color_normal = "Red"
+                #self.ids.password_field.line_color_normal = "Red"
 
 
 class MainApp(MDApp):
@@ -165,6 +165,5 @@ class MainApp(MDApp):
         """
 
         pass
-
 
 MainApp().run()  # Starts GUI execution.

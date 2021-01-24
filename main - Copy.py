@@ -55,7 +55,7 @@ class AppLayout(Screen):
                     try:
                         incoming_msg = msg.split(':')
                         if incoming_msg[0] != NAME:
-                            self.new_message(incoming_msg[1], "profile_pic\Moose.png", name=incoming_msg[0])
+                            self.new_message(incoming_msg[1]+emotion_display.main(incoming_msg[1]), "profile_pic\Moose.png", name=incoming_msg[0])
                     except:
                         self.new_message(msg, "profile_pic\Ammar.png")
 
@@ -77,9 +77,8 @@ class AppLayout(Screen):
         """
         Has to be done here to let kivy access the function
         """
-        message = self.ids.msg_field.text
-        message+=emotion_display.main(message)
-        message+= "          "
+        message = self.ids.msg_field.text+"          "
+
 
 
         # Sends the message from the app
